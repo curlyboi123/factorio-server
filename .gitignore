@@ -1,0 +1,3 @@
+.terraform/
+locals.tf
+backend.tfvars

@@ -5,7 +5,7 @@ locals {
 }
 
 provider "aws" {
-  region = "eu-west-1"
+  region = local.region
 }
 
 data "http" "my_ipv4" {
@@ -18,7 +18,7 @@ module "factorio_vpc" {
   name = "factorio-vpc"
   cidr = "10.1.0.0/27"
 
-  azs            = ["eu-west-1a", "eu-west-1b", "eu-west-1c"]
+  azs            = ["${local.region}a", "${local.region}b", "${local.region}c"]
   public_subnets = ["10.1.0.0/28"]
 
   enable_nat_gateway = false

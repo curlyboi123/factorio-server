@@ -148,7 +148,10 @@ resource "aws_instance" "factorio_server" {
   user_data                   = file("${path.module}/factorio_server_setup.sh")
   user_data_replace_on_change = true
 
-  tags = {
-    Name = "factorio-server"
+  instance_market_options {
+    market_type = "spot"
+    spot_options {
+      max_price = var.spot_price
+    }
   }
 }

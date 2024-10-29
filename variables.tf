@@ -9,3 +9,9 @@ variable "instance_type" {
   type        = string
   default     = "t3.medium"
 }
+
+variable "spot_price" {
+  description = "The maximum amount you are willing to pay for the spot instance"
+  type        = string
+  default     = "0.025"
+}

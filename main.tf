@@ -1,19 +1,17 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.46"
-    }
-  }
-
-  required_version = ">= 1.2.0"
-
-  backend "s3" {
-  }
+locals {
+  region        = "eu-west-1"
+  factorio_port = "34197"
+  // TODO make this a data lookup
+  factorio_ami_id = "ami-07d49117b6f95f5c2a" // red_hat_9_eu_west_1_ami
+  my_ipv4         = "${chomp(data.http.my_ipv4.response_body)}/32"
 }
 
 provider "aws" {
   region = "eu-west-1"
+}
+
+data "http" "my_ipv4" {
+  url = "https://ipv4.icanhazip.com"
 }
 
 module "factorio_vpc" {
@@ -65,14 +63,14 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_egress" {
 }
 
 resource "aws_instance" "factorio_server" {
-  ami           = local.red_hat_9_eu_west_1_ami // Red Hat 9
+  ami           = local.factorio_ami_id
   instance_type = "t3.medium"
 
   vpc_security_group_ids      = [aws_security_group.factorio_vpc.id]
   subnet_id                   = module.factorio_vpc.public_subnets[0]
   associate_public_ip_address = true
 
-  key_name = local.ssh_key_pair_name
+  key_name = var.ssh_key_pair_name
 
   tags = {
     Name = "factorio-server"

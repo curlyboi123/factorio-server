@@ -1,9 +1,7 @@
 locals {
   region        = "eu-west-1"
   factorio_port = "34197"
-  // TODO make this a data lookup
-  factorio_ami_id = "ami-07d49117b6f95f5c2a" // red_hat_9_eu_west_1_ami
-  my_ipv4         = "${chomp(data.http.my_ipv4.response_body)}/32"
+  my_ipv4       = "${chomp(data.http.my_ipv4.response_body)}/32"
 }
 
 provider "aws" {

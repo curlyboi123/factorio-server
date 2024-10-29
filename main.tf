@@ -6,6 +6,13 @@ locals {
 
 provider "aws" {
   region = local.region
+
+  default_tags {
+    tags = {
+      Name    = "factorio"
+      Project = "github.com/curlyboi123/factorio-server"
+    }
+  }
 }
 
 data "http" "my_ipv4" {
@@ -24,11 +31,6 @@ module "factorio_vpc" {
 
   enable_nat_gateway = false
   enable_vpn_gateway = false
-
-  tags = {
-    Terraform   = "true"
-    Environment = "dev"
-  }
 }
 
 resource "aws_security_group" "factorio_vpc" {

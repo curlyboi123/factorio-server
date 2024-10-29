@@ -13,7 +13,8 @@ data "http" "my_ipv4" {
 }
 
 module "factorio_vpc" {
-  source = "terraform-aws-modules/vpc/aws"
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "5.14.0"
 
   name = "factorio-vpc"
   cidr = "10.1.0.0/27"

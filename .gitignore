@@ -1,3 +1,5 @@
 .terraform/
+.history/
 locals.tf
 backend.tfvars
+personal.tfvars

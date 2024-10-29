@@ -112,6 +112,11 @@ resource "aws_iam_role_policy_attachment" "aws_ssm_managed_instance_core" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
+resource "aws_iam_role_policy_attachment" "aws_cloudwatch_agent_server_role" {
+  role       = aws_iam_role.factorio_server.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
+
 data "aws_ami" "aws_linux" {
   most_recent = true
 

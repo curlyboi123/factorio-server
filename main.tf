@@ -115,7 +115,7 @@ data "aws_ami" "aws_linux" {
 
   filter {
     name   = "name"
-    values = ["al2023-ami-2023.6.20241010.*"]
+    values = ["al2023-ami-2023*"]
   }
 
   filter {
@@ -123,7 +123,7 @@ data "aws_ami" "aws_linux" {
     values = ["x86_64"]
   }
 
-  owners = ["137112412989"]
+  owners = ["amazon"]
 }
 
 resource "aws_instance" "factorio_server" {

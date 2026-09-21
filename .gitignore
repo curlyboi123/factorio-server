@@ -1,5 +1,7 @@
+# TTerraform
 .terraform/
-.history/
-locals.tf
 backend.tfvars
 personal.tfvars
+
+# VSCode Extensions
+.history/

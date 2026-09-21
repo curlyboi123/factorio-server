@@ -1,0 +1,11 @@
+[tools]
+opentofu = "1.11.5"
+
+[tasks.init]
+run = "tofu init --backend-config=backend.tfvars"
+
+[tasks.plan]
+run = "tofu plan"
+
+[tasks.apply]
+run = "tofu apply"

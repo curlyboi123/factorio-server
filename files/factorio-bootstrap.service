@@ -1,0 +1,13 @@
+[Unit]
+Description=Restore Factorio save and config from S3
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=factorio
+ExecStart=/home/factorio/scripts/bootstrap-save.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

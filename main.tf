@@ -1,7 +1,7 @@
 #trivy:ignore:AWS-0178 VPC Flow Logs. TODO: Check if free/very cheap and implement if so
 module "factorio_vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "5.14.0"
+  version = "~> 6.7.3"
 
   name = "factorio-vpc"
   cidr = "10.1.0.0/27"
@@ -53,29 +53,44 @@ resource "aws_iam_role" "factorio_server" {
   name               = "factorio_server"
   assume_role_policy = data.aws_iam_policy_document.instance_assume_role_policy.json
 }
+
 resource "aws_iam_instance_profile" "factorio_server" {
   name = "factorio_server"
   role = aws_iam_role.factorio_server.name
 }
 
-resource "aws_iam_role_policy" "get_factorio_assets" {
-  name = "get_factorio_assets"
+data "aws_iam_policy_document" "allow_factorio_config_get" {
+  statement {
+    actions = ["s3:GetObject"]
+
+    resources = [
+      "arn:aws:s3:::${local.factorio_asset_bucket}/config/*",
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "allow_factorio_save_sync" {
+  statement {
+    actions = ["s3:PutObject", "s3:GetObject"]
+
+    resources = [
+      "arn:aws:s3:::${local.factorio_asset_bucket}/saves/*",
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "allow_factorio_config_access" {
+  name = "AllowFactorioConfigAccess"
   role = aws_iam_role.factorio_server.id
 
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = [
-          "s3:GetObject",
-        ]
-        Effect = "Allow"
-        Resource = [
-          "arn:aws:s3:::john-factorio-assets/*"
-        ]
-      },
-    ]
-  })
+  policy = data.aws_iam_policy_document.allow_factorio_config_get.json
+}
+
+resource "aws_iam_role_policy" "allow_factorio_save_sync" {
+  name = "AllowFactorioSaveSync"
+  role = aws_iam_role.factorio_server.id
+
+  policy = data.aws_iam_policy_document.allow_factorio_save_sync.json
 }
 
 // TODO Scope down this policy to just required perms to SSM to instance
@@ -105,6 +120,44 @@ data "aws_ami" "aws_linux" {
   owners = ["amazon"]
 }
 
+data "cloudinit_config" "factorio" {
+  gzip          = false
+  base64_encode = true
+
+  part {
+    filename     = "factorio_server_setup.sh"
+    content_type = "text/x-shellscript"
+
+    content = file("${path.module}/scripts/factorio_server_setup.sh")
+  }
+
+  part {
+    filename     = "cloud-config.yaml"
+    content_type = "text/cloud-config"
+    content = yamlencode({
+      write_files = [
+        {
+          path        = "/etc/systemd/system/factorio.service"
+          permissions = 0644
+          content     = file("${path.module}/files/factorio.service")
+        },
+        {
+          path        = "/etc/systemd/system/factorio-save-sync.service"
+          permissions = 0644
+          content     = file("${path.module}/files/factorio-save-sync.service")
+        },
+        {
+          path        = "/home/factorio/scripts/watch-and-sync-save.sh"
+          permissions = "0755"
+          owner       = "factorio:factorio"
+          content     = file("${path.module}/scripts/watch-and-sync-save.sh")
+        },
+      ]
+    })
+  }
+}
+
+
 #trivy:ignore:AWS-0028 Instance metadata service token TODO: Implement this
 #trivy:ignore:AWS-0131 Unecrypted block device. TODO: Check cost and implement if free/very cheap
 resource "aws_instance" "factorio_server" {
@@ -120,11 +173,12 @@ resource "aws_instance" "factorio_server" {
 
   key_name = var.ssh_key_pair_name
 
-  user_data                   = file("${path.module}/scripts/factorio_server_setup.sh")
+  user_data_base64            = data.cloudinit_config.factorio.rendered
   user_data_replace_on_change = true
 
   instance_market_options {
     market_type = "spot"
+
     spot_options {
       max_price = var.spot_price
     }

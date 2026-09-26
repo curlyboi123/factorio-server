@@ -1,0 +1,18 @@
+[Unit]
+Description=Factorio Dedicated Server
+After=network.target factorio-bootstrap.service
+Requires=factorio-bootstrap.service
+
+[Service]
+Type=simple
+User=factorio
+WorkingDirectory=/home/factorio
+ExecStartPre=/home/factorio/scripts/create-if-missing.sh
+ExecStart=/opt/factorio/bin/x64/factorio \
+    --start-server-load-latest \
+    --server-settings /home/factorio/config/server-settings.json
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

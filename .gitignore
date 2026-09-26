@@ -5,3 +5,6 @@ personal.tfvars
 
 # VSCode Extensions
 .history/
+
+# Factorio config containing sensitive values
+config/server-settings.json

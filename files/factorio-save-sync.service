@@ -1,0 +1,14 @@
+[Unit]
+Description=Watch and sync Factorio saves to S3
+After=factorio.service
+PartOf=factorio.service
+
+[Service]
+Type=simple
+User=factorio
+ExecStart=/home/factorio/scripts/watch-and-sync-save.sh
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

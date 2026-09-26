@@ -2,7 +2,12 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.46"
+      version = "~> 6.28.0"
+    }
+
+    cloudinit = {
+      source  = "hashicorp/cloudinit"
+      version = "~> 2.4.1"
     }
 
     http = {
@@ -14,6 +19,5 @@ terraform {
   required_version = ">= 1.2.0"
 
   backend "s3" {
-    region = local.region
   }
 }
